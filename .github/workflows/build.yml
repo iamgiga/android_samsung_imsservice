@@ -31,6 +31,7 @@ jobs:
 
       - name: Build the project
         env:
-          SDK_HOME: ${{ env.ANDROID_HOME }}
           APKTOOL_JAR_PATH: /usr/local/bin/apktool.jar
-        run: ./build.sh
+        run: |
+          export SDK_HOME=$ANDROID_HOME
+          ./build.sh
