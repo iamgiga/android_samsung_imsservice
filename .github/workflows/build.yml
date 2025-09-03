@@ -1,0 +1,36 @@
+name: Build IMS Service
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3.2.2
+
+      - name: Install Android platform-35
+        run: echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35"
+
+      - name: Install Apktool
+        run: |
+          wget -O apktool.jar https://github.com/iBotPeaches/Apktool/releases/download/v2.12.0/apktool_2.12.0.jar
+          chmod +x apktool.jar
+          sudo mv apktool.jar /usr/local/bin/
+
+      - name: Build the project
+        env:
+          SDK_HOME: ${{ env.ANDROID_HOME }}
+          APKTOOL_JAR_PATH: /usr/local/bin/apktool.jar
+        run: ./build.sh
