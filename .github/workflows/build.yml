@@ -7,6 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -25,6 +28,7 @@ jobs:
 
       - name: Install Apktool
         run: |
+          set +e
           wget -O apktool.jar https://github.com/iBotPeaches/Apktool/releases/download/v2.12.0/apktool_2.12.0.jar
           chmod +x apktool.jar
           sudo mv apktool.jar /usr/local/bin/
@@ -35,3 +39,20 @@ jobs:
         run: |
           export SDK_HOME=$ANDROID_HOME
           ./build.sh
+
+      - name: Commit
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+          rm -rf build
+          mkdir -p build
+          mv smali_out/* build/
+
+          if ! git diff --quiet --exit-code build/; then
+            git add build/
+            git commit -m "ci: update generated smali files"
+            git push
+          else
+            echo "No changes to commit."
+          fi
